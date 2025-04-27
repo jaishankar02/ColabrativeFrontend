@@ -24,6 +24,7 @@ const EditorPage = () => {
             socketRef.current.emit(ACTIONS.JOIN,{
                 roomId,
                 username:location.state?.userName,
+                password:location.state?.password
             })
 
             socketRef.current.on(ACTIONS.JOINED,({clients,username,socketId})=>{
@@ -58,6 +59,21 @@ const EditorPage = () => {
         return <Navigate to="/"/>
     }
 
+    const copyToClipboard = () => {
+        navigator.clipboard.writeText(roomId)
+            .then(() => {
+                alert("RoomID copied to clipboard!");
+            })
+            .catch((error) => {
+                console.error("Failed to copy RoomID: ", error);
+            });
+    };
+
+    const leaveRoom = () => {
+        socketRef.current.emit(ACTIONS.LEAVE, { roomId, username: location.state.userName });
+        socketRef.current.disconnect();
+        reactNavigator('/');
+    };
 
   return (
     <div className='mainWrap'>
@@ -70,8 +86,8 @@ const EditorPage = () => {
                     }
                 </div>
             </div>
-            <button className='btn copyBtn'>Copy RoomID</button>
-            <button className='btn leaveBtn'>Leave Button</button>
+            <button className='btn copyBtn' onClick={copyToClipboard}>Copy RoomID</button>
+            <button className='btn leaveBtn' onClick={leaveRoom}>Leave Button</button>
         </div>
         <div className='editorWrap'>
             <Editor socketRef={socketRef} roomId={roomId} onCodeChange={(code)=>{codeRef.current=code;}} username={location.state?.userName} />
